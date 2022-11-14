@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TP1</string>
+    <string name="app_title">Cálculos Rápidos</string>
+    <string name="msg_singleplayer">Um jogador</string>
+    <string name="msg_multiplayer">Multijogador</string>
+    <string name="msg_settings">Definições</string>
+    <string name="msg_history">Histórico</string>
+</resources>
