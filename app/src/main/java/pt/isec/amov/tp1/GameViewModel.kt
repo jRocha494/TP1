@@ -1,10 +1,19 @@
 package pt.isec.amov.tp1
 
-import java.util.Collections
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
-class GameData {
-    lateinit var tab: ArrayList<String>
+class GameViewModel() : ViewModel() {
+    var tab: ArrayList<String>
     val results  = ArrayList<Double>()
+    lateinit var biggestResults: HashMap<Int, Double>
+
+    var score = MutableLiveData<Int>()
+    var levelNumber = MutableLiveData<Int>()
+    var attempts = MutableLiveData<Int>()
 
     companion object {
         private const val BOARD_SIZE = 25
@@ -14,6 +23,12 @@ class GameData {
         private const val DIVISION = "/"
         private const val WHITESPACE = ""
         private val BLANK_BOARD_POSITIONS = arrayOf(6, 8, 16, 18)
+    }
+
+    init {
+        tab = populateGameTab(0, 9)
+        score.value = 0
+        levelNumber.value = 1
     }
 
     fun populateGameTab(min: Int, max: Int): ArrayList<String>{
@@ -47,6 +62,12 @@ class GameData {
             results.add(computeExpression(expression))
             expression.clear()
         }
+
+        var aux = results
+        aux.sort()
+        biggestResults = HashMap()
+        biggestResults.put(results.indexOf(aux[0]), aux[0])
+        biggestResults.put(results.indexOf(aux[1]), aux[1])
 
         return tab
     }
@@ -100,5 +121,42 @@ class GameData {
                 WHITESPACE
             }
         }
+    }
+
+    fun selectExpression(position: Int, isHorizontal: Boolean) : Boolean{
+        var selectedResult = 0.0
+
+        if (isHorizontal){
+            val row = (position / 10) % 10 //para verificar se está na primeira fila (posicoes 0 a 4), segunda (10 a 14) ou terceira (20 a 24)
+
+            selectedResult = results[row]
+        }
+        else{
+            val column = position % 10 //para verificar em que coluna está (0 - primeira coluna, 2 - segunda coluna, 4 - terceira coluna)
+
+            if(column % 2 != 0) // a coluna não pode ser 1 ou 3, pois estas nao tem expressões
+                return false
+
+            when(column) {
+                0 -> selectedResult = results[4] //resultado da primeira coluna no array results
+                2 -> selectedResult = results[5] //resultado da segunda coluna no array results
+                4 -> selectedResult = results[6] //resultado da terceira coluna no array results
+            }
+        }
+
+        if(selectedResult == biggestResults.get(0)) { //Melhor resultado
+            score.value = (score.value)?.plus(2)
+        }else if (selectedResult == biggestResults.get(1)){ //Segundo melhor resultado
+            score.value = (score.value)?.plus(1)
+        }
+
+        attempts.value = (attempts.value)?.plus(1)
+        if(attempts.value == 5) { //Novo nivel ou perde caso sejam atingidas 5 tentativas
+            levelNumber.value = (levelNumber.value)?.plus(1)
+            attempts.value = 0
+        }
+
+        tab = populateGameTab(0 , 9)
+        return true
     }
 }
