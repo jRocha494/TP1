@@ -1,18 +1,19 @@
 package pt.isec.amov.tp1
 
 import android.os.Bundle
-import android.provider.ContactsContract.Data
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import pt.isec.amov.tp1.databinding.ActivitySingleplayerBinding
 
 class SingleplayerActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySingleplayerBinding
-    private val data: GameData = GameData()
+    private lateinit var viewModel: GameViewModel
     private lateinit var gestureDetector: GestureDetector
+    private lateinit var adapter: Adapter
 
     companion object {
         private const val TAG = "TAG"
@@ -23,12 +24,33 @@ class SingleplayerActivity : AppCompatActivity() {
         binding = ActivitySingleplayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val gridView = binding.tabGv
-        val adapter = Adapter(this, R.layout.game_cell_text_view, data.populateGameTab(1,9))
-        gridView.adapter = adapter
+        viewModel = ViewModelProvider(this).get(GameViewModel::class.java)
+        adapter = Adapter(this, R.layout.game_cell_text_view, viewModel.tab)
+        viewModel.score.observe(this, Observer { newScore ->
+            updateScoreTextView(newScore)
+        })
+        viewModel.levelNumber.observe(this, Observer { newLevel ->
+            updateLevelTextView(newLevel)
+        })
+        viewModel.attempts.observe(this, Observer { newAttemptsNumber ->
+            updateAttemptsTextView(newAttemptsNumber)
+        })
 
+        binding.tabGv.adapter = adapter
         createGestureDetector()
-        gridView.setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
+        binding.tabGv.setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
+    }
+
+    private fun updateScoreTextView(newScore: Int?) {
+        binding.scoreTv.text = "Score: $newScore"
+    }
+
+    private fun updateLevelTextView(newLevel: Int?) {
+        binding.levelTv.text = "Level: $newLevel"
+    }
+
+    private fun updateAttemptsTextView(newAttemptsNumber: Int?) {
+        binding.attemptsTv.text = "Attempts: $newAttemptsNumber/5"
     }
 
     fun createGestureDetector(){
@@ -39,6 +61,7 @@ class SingleplayerActivity : AppCompatActivity() {
                 velocityX: Float,
                 velocityY: Float
             ): Boolean {
+                var isTabChanged = false
                 val position = binding.tabGv.pointToPosition(e1.getX().toInt(), e1.getY().toInt());
                 Log.d(TAG, "onFling / Position: $position")
 
@@ -47,22 +70,15 @@ class SingleplayerActivity : AppCompatActivity() {
                 val dy = e2.y - e1.y
                 if (Math.abs(dx) > Math.abs(dy)) {
                     // Swipe is horizontal
-                    if (dx > 0) {
-                        // Swipe is to the right
-                        Log.d(TAG,"RIGHT")
-                    } else {
-                        // Swipe is to the left
-                        Log.d(TAG,"LEFT")
-                    }
+                    isTabChanged = viewModel.selectExpression(position, true)
                 } else {
                     // Swipe is vertical
-                    if (dy > 0) {
-                        // Swipe is to the bottom
-                        Log.d(TAG,"DOWN")
-                    } else {
-                        // Swipe is to the top
-                        Log.d(TAG,"UP")
-                    }
+                    isTabChanged = viewModel.selectExpression(position, false)
+                }
+                if(isTabChanged) {
+                    adapter.clear()
+                    adapter.addAll(viewModel.tab)
+                    adapter.notifyDataSetChanged()
                 }
                 return true
             }
