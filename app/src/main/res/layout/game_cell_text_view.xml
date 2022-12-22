@@ -6,5 +6,5 @@
     android:gravity="center"
     android:textColor="@color/black"
     android:textSize="20sp"
-    android:minHeight="60dp">
+    android:minHeight="50dp">
 </TextView>

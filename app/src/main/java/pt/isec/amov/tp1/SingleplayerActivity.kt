@@ -1,5 +1,6 @@
 package pt.isec.amov.tp1
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
@@ -8,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import pt.isec.amov.tp1.databinding.ActivitySingleplayerBinding
+import android.content.DialogInterface
 
 class SingleplayerActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySingleplayerBinding
@@ -26,14 +28,39 @@ class SingleplayerActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this).get(GameViewModel::class.java)
         adapter = Adapter(this, R.layout.game_cell_text_view, viewModel.tab)
-        viewModel.score.observe(this, Observer { newScore ->
-            updateScoreTextView(newScore)
-        })
-        viewModel.levelNumber.observe(this, Observer { newLevel ->
-            updateLevelTextView(newLevel)
-        })
-        viewModel.attempts.observe(this, Observer { newAttemptsNumber ->
-            updateAttemptsTextView(newAttemptsNumber)
+
+        viewModel.state.observe(this, Observer { newState ->
+            when(newState){
+                State.PLAYING_GAME -> {
+                    viewModel.score.observe(this, Observer { newScore ->
+                        updateScoreTextView(newScore)
+                    })
+                    viewModel.levelNumber.observe(this, Observer { newLevel ->
+                        updateLevelTextView(newLevel)
+                    })
+                    viewModel.correctAnswers.observe(this, Observer { newCorrectAnswersNumber ->
+                        updateCorrectAnswersTextView(newCorrectAnswersNumber)
+                    })
+                    viewModel.wrongAnswers.observe(this, Observer { newWrongAnswersNumber ->
+                        updateWrongAnswersTextView(newWrongAnswersNumber)
+                    })
+                    viewModel.elapsedTime.observe(this, Observer { newTimerValue ->
+                        updateTimerTextView(newTimerValue)
+                    })
+                }
+                State.GAME_OVER -> {
+                    var builder= AlertDialog.Builder(this)
+                    builder.setTitle("Fim do Jogo")
+                    builder.setMessage("Recomeçar jogo?")
+                    builder.setPositiveButton("Recomeçar",
+                        DialogInterface.OnClickListener { dialog, which ->
+                            viewModel.restartGame()
+                            dialog.dismiss()
+                        })
+                    val dialog: AlertDialog = builder.create()
+                    dialog.show()
+                }
+            }
         })
 
         binding.tabGv.adapter = adapter
@@ -49,8 +76,16 @@ class SingleplayerActivity : AppCompatActivity() {
         binding.levelTv.text = "Level: $newLevel"
     }
 
-    private fun updateAttemptsTextView(newAttemptsNumber: Int?) {
-        binding.attemptsTv.text = "Attempts: $newAttemptsNumber/5"
+    private fun updateCorrectAnswersTextView(newCorrectAnswersNumber: Int?) {
+        binding.correctAnswersTv.text = "Correct: $newCorrectAnswersNumber"
+    }
+
+    private fun updateWrongAnswersTextView(newWrongAnswersNumber: Int?) {
+        binding.wrongAnswersTv.text = "Wrong: $newWrongAnswersNumber"
+    }
+
+    private fun updateTimerTextView(newTimerValue: Long?) {
+        binding.tvTimer.text = "Time: $newTimerValue"
     }
 
     fun createGestureDetector(){
@@ -61,7 +96,7 @@ class SingleplayerActivity : AppCompatActivity() {
                 velocityX: Float,
                 velocityY: Float
             ): Boolean {
-                var isTabChanged = false
+                var isTabChanged: Boolean
                 val position = binding.tabGv.pointToPosition(e1.getX().toInt(), e1.getY().toInt());
                 Log.d(TAG, "onFling / Position: $position")
 

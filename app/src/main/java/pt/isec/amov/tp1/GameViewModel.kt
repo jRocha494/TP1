@@ -1,11 +1,15 @@
 package pt.isec.amov.tp1
 
+import android.os.CountDownTimer
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
+
+enum class State {
+    PLAYING_GAME, GAME_OVER
+}
 
 class GameViewModel() : ViewModel() {
     var tab: ArrayList<String>
@@ -14,13 +18,20 @@ class GameViewModel() : ViewModel() {
 
     var score = MutableLiveData<Int>()
     var levelNumber = MutableLiveData<Int>()
-    var attempts = MutableLiveData<Int>()
+    var correctAnswers = MutableLiveData<Int>()
+    var wrongAnswers = MutableLiveData<Int>()
+    var elapsedTime = MutableLiveData<Long>()
+    var state = MutableLiveData<State>()
 
     private var minValue: Int
     private var maxValue: Int
     private var maxOperator: Int
+    private var levelTimeDecrement: Int
+
+    private lateinit var timer: CountDownTimer
 
     companion object {
+        private const val TAG = "TAG"
         private const val BOARD_SIZE = 25
         private const val ADDITION = "+"
         private const val SUBTRACTION = "-"
@@ -28,31 +39,54 @@ class GameViewModel() : ViewModel() {
         private const val DIVISION = "/"
         private const val WHITESPACE = ""
         private val BLANK_BOARD_POSITIONS = arrayOf(6, 8, 16, 18)
-        private const val TAG = "TAG"
+        private const val NECESSARY_RIGHT_ANSWERS = 3
+        private const val GAME_TIME = 60
+        private const val BONUS_TIME = 5
     }
 
     init {
         score.value = 0
         levelNumber.value = 1
-        attempts.value = 0
+        correctAnswers.value = 0
+        wrongAnswers.value = 0
+        elapsedTime.value = GAME_TIME.toLong()
 
         minValue = 1
         maxValue = 9
         maxOperator = 0 //Primeiro nivel comeca por ter so adicao
-        tab = populateGameTab(this)
+        levelTimeDecrement = 0
+
+        tab = populateGameTab()
+        startTimer()
     }
 
-    private fun populateGameTab(gameViewModel: GameViewModel): ArrayList<String>{
-        gameViewModel.tab = ArrayList()
-        gameViewModel.results = ArrayList()
+    private fun initGame(){
+        score.value = 0
+        levelNumber.value = 1
+        correctAnswers.value = 0
+        wrongAnswers.value = 0
+        elapsedTime.value = GAME_TIME.toLong()
+
+        minValue = 1
+        maxValue = 9
+        maxOperator = 0 //Primeiro nivel comeca por ter so adicao
+        levelTimeDecrement = 0
+
+        tab = populateGameTab()
+        startTimer()
+    }
+
+    private fun populateGameTab(): ArrayList<String>{
+        tab = ArrayList()
+        results = ArrayList()
 
         for(i in 0 until BOARD_SIZE){
             if(BLANK_BOARD_POSITIONS.contains(i))
-                gameViewModel.tab.add(i, WHITESPACE)
+                tab.add(i, WHITESPACE)
             else if(i % 2 == 0)
-                gameViewModel.tab.add(i, gameViewModel.randomNumberGenerator(minValue, maxValue))
+                tab.add(i, randomNumberGenerator(minValue, maxValue))
             else
-                gameViewModel.tab.add(i, gameViewModel.randomOperatorGenerator(maxOperator))
+                tab.add(i, randomOperatorGenerator(maxOperator))
         }
 
         val expression = ArrayList<String>()
@@ -60,30 +94,30 @@ class GameViewModel() : ViewModel() {
         //Linhas
         for (i in 0 until BOARD_SIZE step 10){
             for (j in 0 until 5){
-                expression.add(gameViewModel.tab[i+j])
+                expression.add(tab[i+j])
             }
-            gameViewModel.results.add(gameViewModel.computeExpression(expression))
+            results.add(computeExpression(expression))
             expression.clear()
         }
 
         //Colunas
         for (j in 0 until 5 step 2){
             for (i in 0 until BOARD_SIZE step 5){
-                expression.add(gameViewModel.tab[i+j])
+                expression.add(tab[i+j])
             }
-            gameViewModel.results.add(gameViewModel.computeExpression(expression))
+            results.add(computeExpression(expression))
             expression.clear()
         }
 
         var aux = ArrayList<Double>()
-        aux.addAll(gameViewModel.results)
+        aux.addAll(results)
         aux.sortDescending()
-        gameViewModel.biggestResults = ArrayList()
-        gameViewModel.biggestResults.add(aux[0])
-        gameViewModel.biggestResults.add(aux[1])
-        Log.d(TAG, "BIGGEST RESULTS: ${gameViewModel.results.indexOf(aux[0])},${gameViewModel.results.indexOf(aux[1])}") //LOG PARA DEBUG
+        biggestResults = ArrayList()
+        biggestResults.add(aux[0])
+        biggestResults.add(aux[1])
+        Log.d(TAG, "BIGGEST RESULTS: ${results.indexOf(aux[0])},${results.indexOf(aux[1])}") //LOG PARA DEBUG
 
-        return gameViewModel.tab
+        return tab
     }
 
     private fun computeExpression(expression : ArrayList<String>) : Double{
@@ -123,9 +157,7 @@ class GameViewModel() : ViewModel() {
     }
 
     private fun randomOperatorGenerator(max: Int): String {
-        val rand = randomNumberGenerator(0, maxOperator)
-
-        return when (rand) {
+        return when (randomNumberGenerator(0, max)) {
             "0" -> ADDITION
             "1" -> SUBTRACTION
             "2" -> MULTIPLICATION
@@ -157,33 +189,75 @@ class GameViewModel() : ViewModel() {
             }
         }
 
-        nextLevel(selectedResult)
+        processSelection(selectedResult)
         return true
     }
 
-    private fun nextLevel(selectedResult: Double){
+    private fun processSelection(selectedResult: Double){
         if(selectedResult == biggestResults[0]) { //Melhor resultado
             score.value = (score.value)?.plus(2)
+            correctAnswers.value = (correctAnswers.value)?.plus(1)
+            incrementTimer()
         }else if (selectedResult == biggestResults[1]){ //Segundo melhor resultado
             score.value = (score.value)?.plus(1)
+            correctAnswers.value = (correctAnswers.value)?.plus(1)
+            incrementTimer()
+        }else{
+            wrongAnswers.value = (wrongAnswers.value)?.plus(1)
         }
 
-        attempts.value = (attempts.value)?.plus(1)
-        if(attempts.value == 5) { //Novo nivel ou perde caso sejam atingidas 5 tentativas
+        if((correctAnswers.value!!) == NECESSARY_RIGHT_ANSWERS) { //Novo nivel
             levelNumber.value = (levelNumber.value)?.plus(1)
 
             if(levelNumber.value!! < 5){
-                maxOperator += 1 //Passa a poder incluir mais um operador
+                maxOperator++ //Passa a poder incluir mais um operador
             }else{
-                if (levelNumber.value!! % 2 != 0)
+                if (levelNumber.value!! % 2 != 0) {
                     maxValue *= 11 //se o nivel for impar
+                }
                 else
                     minValue *= 10
             }
 
-            attempts.value = 0
+            levelTimeDecrement++
+            correctAnswers.value = 0
+            wrongAnswers.value = 0
         }
 
-        tab = populateGameTab(this)
+        tab = populateGameTab()
+    }
+
+    private fun startTimer() {
+        state.value = State.PLAYING_GAME
+
+        timer = object : CountDownTimer(((elapsedTime.value!!) * 1000), 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                elapsedTime.value = millisUntilFinished / 1000
+            }
+
+            override fun onFinish() {
+                state.value = State.GAME_OVER
+            }
+        }
+        timer.start()
+    }
+
+    private fun pauseTimer() {
+        timer.cancel()
+    }
+
+    private fun incrementTimer(){
+        timer.cancel()
+        if(elapsedTime.value!! + BONUS_TIME > GAME_TIME - levelTimeDecrement) {
+            elapsedTime.value = GAME_TIME.toLong() - levelTimeDecrement
+        }else
+            elapsedTime.value = elapsedTime.value!! + BONUS_TIME
+
+
+        startTimer()
+    }
+
+    fun restartGame(){
+        initGame()
     }
 }
