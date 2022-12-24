@@ -10,6 +10,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import pt.isec.amov.tp1.databinding.ActivitySingleplayerBinding
 import android.content.DialogInterface
+import android.widget.Toast
+import kotlin.math.abs
 
 class SingleplayerActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySingleplayerBinding
@@ -49,11 +51,11 @@ class SingleplayerActivity : AppCompatActivity() {
                     })
                 }
                 State.GAME_OVER -> {
-                    var builder= AlertDialog.Builder(this)
+                    val builder= AlertDialog.Builder(this)
                     builder.setTitle("Fim do Jogo")
                     builder.setMessage("Recomeçar jogo?")
                     builder.setPositiveButton("Recomeçar",
-                        DialogInterface.OnClickListener { dialog, which ->
+                        DialogInterface.OnClickListener { dialog, _ ->
                             viewModel.restartGame()
                             dialog.dismiss()
                         })
@@ -96,14 +98,14 @@ class SingleplayerActivity : AppCompatActivity() {
                 velocityX: Float,
                 velocityY: Float
             ): Boolean {
-                var isTabChanged: Boolean
+                val isTabChanged: Boolean
                 val position = binding.tabGv.pointToPosition(e1.getX().toInt(), e1.getY().toInt());
                 Log.d(TAG, "onFling / Position: $position")
 
                 // Calculate the position and direction of the swipe gesture
                 val dx = e2.x - e1.x
                 val dy = e2.y - e1.y
-                if (Math.abs(dx) > Math.abs(dy)) {
+                if (abs(dx) > abs(dy)) {
                     // Swipe is horizontal
                     isTabChanged = viewModel.selectExpression(position, true)
                 } else {

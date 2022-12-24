@@ -7,10 +7,6 @@ import androidx.lifecycle.ViewModel
 import java.util.*
 import kotlin.collections.ArrayList
 
-enum class State {
-    PLAYING_GAME, GAME_OVER
-}
-
 class GameViewModel() : ViewModel() {
     var tab: ArrayList<String>
     lateinit var results: ArrayList<Double>
@@ -22,6 +18,7 @@ class GameViewModel() : ViewModel() {
     var wrongAnswers = MutableLiveData<Int>()
     var elapsedTime = MutableLiveData<Long>()
     var state = MutableLiveData<State>()
+    var gameMode = MutableLiveData<GameMode>()
 
     private var minValue: Int
     private var maxValue: Int
@@ -40,6 +37,7 @@ class GameViewModel() : ViewModel() {
         private const val WHITESPACE = ""
         private val BLANK_BOARD_POSITIONS = arrayOf(6, 8, 16, 18)
         private const val NECESSARY_RIGHT_ANSWERS = 3
+        private const val LEVEL_ATTEMPTS = 5
         private const val GAME_TIME = 60
         private const val BONUS_TIME = 5
     }
@@ -206,7 +204,7 @@ class GameViewModel() : ViewModel() {
             wrongAnswers.value = (wrongAnswers.value)?.plus(1)
         }
 
-        if((correctAnswers.value!!) == NECESSARY_RIGHT_ANSWERS) { //Novo nivel
+        if((correctAnswers.value!!) >= NECESSARY_RIGHT_ANSWERS) { //Novo nivel
             levelNumber.value = (levelNumber.value)?.plus(1)
 
             if(levelNumber.value!! < 5){
@@ -222,6 +220,9 @@ class GameViewModel() : ViewModel() {
             levelTimeDecrement++
             correctAnswers.value = 0
             wrongAnswers.value = 0
+            restartTimer()
+        }else if(correctAnswers.value!! + wrongAnswers.value!! >= LEVEL_ATTEMPTS){ //Perde o jogo
+            loseGame()
         }
 
         tab = populateGameTab()
@@ -246,6 +247,11 @@ class GameViewModel() : ViewModel() {
         timer.cancel()
     }
 
+    private fun restartTimer(){
+        timer.cancel()
+        startTimer()
+    }
+
     private fun incrementTimer(){
         timer.cancel()
         if(elapsedTime.value!! + BONUS_TIME > GAME_TIME - levelTimeDecrement) {
@@ -259,5 +265,10 @@ class GameViewModel() : ViewModel() {
 
     fun restartGame(){
         initGame()
+    }
+
+    private fun loseGame(){
+        timer.cancel()
+        state.value = State.GAME_OVER
     }
 }
