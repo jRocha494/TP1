@@ -1,6 +1,7 @@
 package pt.isec.amov.tp1
 
 import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
@@ -10,7 +11,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import pt.isec.amov.tp1.databinding.ActivitySingleplayerBinding
 import android.content.DialogInterface
-import android.widget.Toast
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.util.*
 import kotlin.math.abs
 
 class SingleplayerActivity : AppCompatActivity() {
@@ -51,6 +57,9 @@ class SingleplayerActivity : AppCompatActivity() {
                     })
                 }
                 State.GAME_OVER -> {
+                    val sharedPref = getSharedPreferences("profile", Context.MODE_PRIVATE)
+                    val username = sharedPref.getString("username", "")
+                    runBlocking { getFirestoreData(GameScoreObject(username!!, viewModel.score.value!!, viewModel.gameTime.value!!)) }
                     val builder= AlertDialog.Builder(this)
                     builder.setTitle("Fim do Jogo")
                     builder.setMessage("Recomeçar jogo?")
@@ -68,6 +77,31 @@ class SingleplayerActivity : AppCompatActivity() {
         binding.tabGv.adapter = adapter
         createGestureDetector()
         binding.tabGv.setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
+    }
+
+    private suspend fun getFirestoreData(newGameScoreObject: GameScoreObject) {
+        val firestore = FirebaseFirestore.getInstance()
+        val gameScoreObjectsRef = firestore.collection("top5_collection")
+
+        val topFiveQuery = gameScoreObjectsRef.orderBy("score", Query.Direction.DESCENDING).limit(5)
+
+        val snapshot = topFiveQuery.get().await()
+        val topList = snapshot.toObjects(GameScoreObject::class.java)
+
+        if (newGameScoreObject.score > topList.last().score || topList.count() < 5) {
+            if(topList.count() >= 5) {
+                val lastDocId = snapshot.documents.last().id
+                gameScoreObjectsRef.document(lastDocId).delete()
+            }
+
+            var newId = UUID.randomUUID().toString();
+            while (topList.any { it.id == newId }){
+                newId = UUID.randomUUID().toString();
+            }
+            newGameScoreObject.id = newId;
+
+            gameScoreObjectsRef.add(newGameScoreObject).await()
+        }
     }
 
     private fun updateScoreTextView(newScore: Int?) {

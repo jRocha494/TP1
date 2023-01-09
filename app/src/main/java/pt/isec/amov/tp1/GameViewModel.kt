@@ -17,6 +17,7 @@ class GameViewModel() : ViewModel() {
     var correctAnswers = MutableLiveData<Int>()
     var wrongAnswers = MutableLiveData<Int>()
     var elapsedTime = MutableLiveData<Long>()
+    var gameTime = MutableLiveData<Int>()
     var state = MutableLiveData<State>()
     var gameMode = MutableLiveData<GameMode>()
 
@@ -48,6 +49,7 @@ class GameViewModel() : ViewModel() {
         correctAnswers.value = 0
         wrongAnswers.value = 0
         elapsedTime.value = GAME_TIME.toLong()
+        gameTime.value = 0
 
         minValue = 1
         maxValue = 9
@@ -234,10 +236,13 @@ class GameViewModel() : ViewModel() {
         timer = object : CountDownTimer(((elapsedTime.value!!) * 1000), 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 elapsedTime.value = millisUntilFinished / 1000
+                gameTime.value = gameTime.value?.plus(1);
             }
 
             override fun onFinish() {
-                state.value = State.GAME_OVER
+                if(elapsedTime.value!! <= 0) {
+                    state.value = State.GAME_OVER
+                }
             }
         }
         timer.start()
