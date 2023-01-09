@@ -30,4 +30,6 @@
     <string name="msg_level_2">Nível</string>
     <string name="msg_wrong2">Errados</string>
     <string name="msg_correct2">Corretos</string>
+    <string name="msg_credits">Créditos</string>
+    <string name="credits">Feito por:\nJoão Rocha (2018015014) e Pedro Figueiredo (2018012447)\nTurma P1\n2022\2023\nAMOV - Isec</string>
 </resources>

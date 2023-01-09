@@ -29,4 +29,6 @@
     <string name="msg_level_2">Level</string>
     <string name="msg_correct2">Correct</string>
     <string name="msg_wrong2">Wrong</string>
+    <string name="msg_credits">Credits</string>
+    <string name="credits">Made By:\nJoão Rocha (2018015014) and Pedro Figueiredo (2018012447)\nP1 Class\n2022\2023\nAMOV - Isec</string>
 </resources>
