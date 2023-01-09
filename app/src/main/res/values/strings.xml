@@ -5,4 +5,6 @@
     <string name="msg_multiplayer">Multiplayer</string>
     <string name="msg_settings">Create Profile</string>
     <string name="msg_history">History</string>
+    <string name="msg_credits">Credits</string>
+    <string name="credits">Made By:\nJoão Rocha (2018015014) and Pedro Figueiredo (2018012447)\nP1 Class\n2022\2023\nAMOV - Isec</string>
 </resources>

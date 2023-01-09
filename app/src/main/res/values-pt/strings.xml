@@ -6,4 +6,6 @@
     <string name="msg_multiplayer">Multijogador</string>
     <string name="msg_settings">Criar Perfil</string>
     <string name="msg_history">Histórico</string>
+    <string name="msg_credits">Créditos</string>
+    <string name="credits">Feito por:\nJoão Rocha (2018015014) e Pedro Figueiredo (2018012447)\nTurma P1\n2022\2023\nAMOV - Isec</string>
 </resources>

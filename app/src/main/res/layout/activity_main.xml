@@ -30,7 +30,6 @@
             android:layout_margin="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
             android:textSize="24sp"
             android:text="@string/msg_singleplayer"/>
         <Button
@@ -38,7 +37,6 @@
             android:layout_margin="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
             android:textSize="24sp"
             android:text="@string/msg_multiplayer"/>
         <Button
@@ -46,7 +44,6 @@
             android:layout_margin="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
             android:textSize="24sp"
             android:text="@string/msg_settings"/>
         <Button
@@ -54,9 +51,15 @@
             android:layout_margin="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
             android:textSize="24sp"
             android:text="@string/msg_history"/>
+        <Button
+            android:id="@+id/btnCredits"
+            android:layout_margin="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="24sp"
+            android:text="@string/msg_credits"/>
         <LinearLayout
             android:id="@+id/profileLl"
             android:layout_gravity="center_horizontal|bottom"
