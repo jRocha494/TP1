@@ -61,9 +61,9 @@ class SingleplayerActivity : AppCompatActivity() {
                     val username = sharedPref.getString("username", "")
                     runBlocking { getFirestoreData(GameScoreObject(username!!, viewModel.score.value!!, viewModel.gameTime.value!!)) }
                     val builder= AlertDialog.Builder(this)
-                    builder.setTitle("Fim do Jogo")
-                    builder.setMessage("Recomeçar jogo?")
-                    builder.setPositiveButton("Recomeçar",
+                    builder.setTitle("${R.string.msg_game_over}")
+                    builder.setMessage("${R.string.msg_restart_game}")
+                    builder.setPositiveButton("${R.string.msg_restart}",
                         DialogInterface.OnClickListener { dialog, _ ->
                             viewModel.restartGame()
                             dialog.dismiss()
@@ -105,23 +105,23 @@ class SingleplayerActivity : AppCompatActivity() {
     }
 
     private fun updateScoreTextView(newScore: Int?) {
-        binding.scoreTv.text = "Score: $newScore"
+        binding.scoreTv.text = "${R.string.msg_score2}: $newScore"
     }
 
     private fun updateLevelTextView(newLevel: Int?) {
-        binding.levelTv.text = "Level: $newLevel"
+        binding.levelTv.text = "${R.string.msg_level_2}: $newLevel"
     }
 
     private fun updateCorrectAnswersTextView(newCorrectAnswersNumber: Int?) {
-        binding.correctAnswersTv.text = "Correct: $newCorrectAnswersNumber"
+        binding.correctAnswersTv.text = "${R.string.msg_correct2}: $newCorrectAnswersNumber"
     }
 
     private fun updateWrongAnswersTextView(newWrongAnswersNumber: Int?) {
-        binding.wrongAnswersTv.text = "Wrong: $newWrongAnswersNumber"
+        binding.wrongAnswersTv.text = "${R.string.msg_wrong2}: $newWrongAnswersNumber"
     }
 
     private fun updateTimerTextView(newTimerValue: Long?) {
-        binding.tvTimer.text = "Time: $newTimerValue"
+        binding.tvTimer.text = "${R.string.msg_time2}: $newTimerValue"
     }
 
     fun createGestureDetector(){

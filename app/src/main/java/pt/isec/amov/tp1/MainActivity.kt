@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnSingleplayer.setOnClickListener {
             if(username.isNullOrEmpty() || imagePath.isNullOrEmpty() ) {
-                Toast.makeText(this, "Username or Image is null or empty", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "${R.string.msg_username_image_empty}", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             val intent = Intent(this, SingleplayerActivity::class.java)
@@ -46,12 +46,12 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnMultiplayer.setOnClickListener {
             if(username.isNullOrEmpty() || imagePath.isNullOrEmpty() ) {
-                Toast.makeText(this, "Username or Image is null or empty", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "${R.string.msg_username_image_empty}", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 //            val intent = Intent(this, MultiplayerActivity::class.java)
 //            startActivity(intent)
-            Toast.makeText(this, "Multiplayer is not implemented", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "${R.string.msg_multiplayer_not_implemented}", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnSettings.setOnClickListener {

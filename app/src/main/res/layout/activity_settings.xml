@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Log in"
+            android:text="@string/msg_login"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -23,7 +23,7 @@
             android:id="@+id/username_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Username"
+            android:hint="@string/msg_username"
             android:inputType="text"
             android:layout_marginTop="16dp" />
 
@@ -37,7 +37,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Pick Image" />
+                android:text="@string/msg_pick_img" />
 
             <TextView
                 android:id="@+id/image_path_tv"
@@ -53,6 +53,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Create Profile" />
+            android:text="@string/msg_create_profile" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

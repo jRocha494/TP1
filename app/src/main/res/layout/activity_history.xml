@@ -32,7 +32,7 @@
                 android:background="@color/color_secondary"
                 android:fontFamily="monospace"
                 android:gravity="center"
-                android:text="Top 5"
+                android:text="@string/msg_top5"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />

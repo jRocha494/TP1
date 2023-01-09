@@ -32,7 +32,7 @@ class HistoryActivity : AppCompatActivity() {
             val textViewId = resources.getIdentifier("text_$count", "id", packageName)
             val textView = binding.root.findViewById<TextView>(textViewId)
 
-            textView.text = "$count. User: ${entry.username}\n   Score: ${entry.score}\n   Time: ${entry.gameTime}s"
+            textView.text = "$count. ${R.string.msg_user}: ${entry.username}\n   ${R.string.msg_score2}: ${entry.score}\n   ${R.string.msg_time2}: ${entry.gameTime}s"
             count++;
         }
     }

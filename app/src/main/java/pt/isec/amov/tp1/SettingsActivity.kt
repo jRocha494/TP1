@@ -44,7 +44,7 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.loginButton.setOnClickListener{
             if(binding.usernameEditText.text.isNullOrEmpty()) {
-                Toast.makeText(this, "Username is null or empty", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "${R.string.msg_username_empty}", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             var result = false
@@ -52,12 +52,12 @@ class SettingsActivity : AppCompatActivity() {
             runBlocking{ launch {  result = alreadyExists() } }
 
             if(result){
-                Toast.makeText(this, "Username already exists", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "${R.string.msg_username_already_exists}", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             if(imagePath.isNullOrEmpty()) {
-                Toast.makeText(this, "Image path is null or empty", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "${R.string.msg_image_path_empty}", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
